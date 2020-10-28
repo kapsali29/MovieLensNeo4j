@@ -50,3 +50,14 @@ RETURN cocoActors.name
 MATCH (m:Movie {title: "Toy Story"})-[:HAS_GENRE]->(g:Genre)<-[:HAS_GENRE]-(m2:Movie)
 RETURN m2.title as title, count(*) as common_genre_count, collect(g.name) as genres
 ORDER BY common_genre_count DESC LIMIT 15
+
+MATCH (m:Movie {title: "Inception"})-[:HAS_GENRE]->(g:Genre)<-[:HAS_GENRE]-(other:Movie)
+WITH m, other, COUNT(g) AS intersection
+MATCH (m)-[:HAS_GENRE]->(mg:Genre)
+WITH m, other, intersection, collect(mg.name) AS sm
+MATCH (other)-[:HAS_GENRE]->(og:Genre)
+WITH m, other, intersection, sm, collect(og.name) AS so
+WITH sm+so as soyme, intersection, other, m
+WITH DISTINCT soyme, other, m, intersection
+RETURN other.title, 1.0*intersection/SIZE(soyme) as jaccard_index
+ORDER BY jaccard_index DESC LIMIT 20

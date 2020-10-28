@@ -70,3 +70,22 @@ class MovieInsights(object):
             ).format(movie_title=movie_title)
         similar_movies_by_genre = self.neo4j_base_client.generic_executor(similar_movies_query)
         return similar_movies_by_genre
+
+    def jaccard_similarity(self, movie_title):
+        """This function implements Jaccard Similarity"""
+        jaccard_query = (
+            """
+            MATCH (m:Movie {{title: "{movie_title}"}})-[:HAS_GENRE]->(g:Genre)<-[:HAS_GENRE]-(other:Movie)
+            WITH m, other, COUNT(g) AS intersection
+            MATCH (m)-[:HAS_GENRE]->(mg:Genre)
+            WITH m, other, intersection, collect(mg.name) AS sm
+            MATCH (other)-[:HAS_GENRE]->(og:Genre)
+            WITH m, other, intersection, sm, collect(og.name) AS so
+            WITH sm+so as soyme, intersection, other, m
+            WITH DISTINCT soyme, other, m, intersection
+            RETURN other.title, 1.0*intersection/SIZE(soyme) as jaccard_index
+            ORDER BY jaccard_index DESC LIMIT 20
+            """
+        ).format(movie_title=movie_title)
+        jaccard_similarity = self.neo4j_base_client.generic_executor(jaccard_query)
+        return jaccard_similarity

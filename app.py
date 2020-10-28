@@ -63,8 +63,17 @@ def fetch_similar_movies_by_genre():
     data = request.get_json()
     movie_title = data['title']
     similar_movies_by_genre = movie_insignts.similarity_based_on_genre(movie_title)
-    print(similar_movies_by_genre[0])
     results = {'{}_similar_movies'.format(movie_title): similar_movies_by_genre}
+    return results, 201
+
+
+@app.route("/jaccard/similarity", methods=['POST'])
+def similar_movies_jaccard():
+    """Returns similar movies using jaccard index"""
+    data = request.get_json()
+    movie_title = data['title']
+    similar_movies_by_genre = movie_insignts.jaccard_similarity(movie_title)
+    results = {'{}_similar_jaccard'.format(movie_title): similar_movies_by_genre}
     return results, 201
 
 
