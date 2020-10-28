@@ -1,0 +1,52 @@
+---This file contains cypher complex queries---
+
+MATCH (m:Movie)-[:HAS_GENRE]->(g:Genre {name: "Mystery"})
+RETURN m
+
+MATCH (m:Movie)-[:HAS_GENRE]->(g:Genre {name: "Mystery"})
+RETURN count(m) as number_of_mystery_movies
+
+MATCH (m:Movie)-[:HAS_GENRE]->(g:Genre {name: "Mystery"})
+WHERE m.budget > 60000000
+RETURN m
+
+MATCH (m:Movie)-[:HAS_GENRE]->(g:Genre {name: "Animation"})
+WHERE m.lang='ja' AND m.budget>1000000
+RETURN m
+
+MATCH (m:Movie {title: "Jumanji"})-[:HAS_GENRE]->(g:Genre)
+RETURN collect(g.name);
+
+MATCH (m:Movie {title: "Heat"})-[:HAS_GENRE]->(g:Genre)<-[:HAS_GENRE]-(other_movies:Movie)
+RETURN other_movies, collect(g.name)
+
+MATCH (m:Movie)-[:HAS_GENRE]->(g:Genre)
+RETURN m.title, size(g.name) as number_of_genres
+ORDER BY number_of_genres DESC
+
+MATCH (m:Movie {title: "Toy Story"})<-[:ACTED_IN]-(a:Actor)
+RETURN a
+ORDER BY a.order ASC
+
+MATCH (m:Movie)<-[:ACTED_IN]-(a:Actor {name: "Tom Hanks"})
+RETURN m.title, a.character
+
+MATCH (a:Actor {name: "Tim Allen"})-[:ACTED_IN]->(m:Movie)-[:HAS_GENRE]->(g:Genre)
+RETURN distinct(g.name) AS genre, count(g.name) as number_of_times
+ORDER BY number_of_times DESC
+
+MATCH (a:Actor {name: "Morgan Freeman"})-[:ACTED_IN]->(m:Movie)<-[:ACTED_IN]-(colleagues:Actor)
+RETURN m.title as movie_title, a.character as actor_role, collect(colleagues.name) as colleagues
+
+MATCH (a:Actor {name: "Tom Hanks"})-[:ACTED_IN]->(m:Movie)-[:HAS_GENRE]->(g:Genre {name: "Fantasy"})
+RETURN m.title as title, a.character as actor_character, a.order as order
+ORDER BY order DESC
+
+MATCH (a:Actor {name: "Tom Hanks"})-[:ACTED_IN]->(m:Movie)<-[:ACTED_IN]-(coActors)-[:ACTED_IN]->(other_movie:Movie)<-[:ACTED_IN]-(cocoActors:Actor)
+WHERE NOT (cocoActors)-[:ACTED_IN]->(:Movie)<-[:ACTED_IN]-(a)
+AND a <> cocoActors
+RETURN cocoActors.name
+
+MATCH (m:Movie {title: "Toy Story"})-[:HAS_GENRE]->(g:Genre)<-[:HAS_GENRE]-(m2:Movie)
+RETURN m2.title as title, count(*) as common_genre_count, collect(g.name) as genres
+ORDER BY common_genre_count DESC LIMIT 15

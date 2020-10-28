@@ -1,0 +1,18 @@
+---The following commands are used to load datasets from import directory---
+
+:auto USING PERIODIC COMMIT 1000
+LOAD CSV WITH HEADERS FROM "file:///movies.csv" AS line
+MERGE (m:Movie {adult:line.adult, budget:line.budget, movie_id:line.movie_id, lang:line.original_language, title:line.title})
+
+:auto USING PERIODIC COMMIT 1000
+LOAD CSV WITH HEADERS FROM "file:///genres.csv" AS line
+MATCH (m:Movie {movie_id: line.movie_id})
+MERGE (g:Genre {id: line.genre_id, name: line.name})
+MERGE (m)-[:HAS_GENRE]->(g);
+
+
+:auto USING PERIODIC COMMIT 1000
+LOAD CSV WITH HEADERS FROM "file:///cast.csv" AS line
+MATCH (m:Movie {movie_id: line.movie_id})
+MERGE (a:Actor {id: line.id, name: line.name, character: line.character, order: line.order})
+MERGE (a)-[:ACTED_IN]->(m);

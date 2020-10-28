@@ -1,0 +1,30 @@
+---This file contains cypher cimple queries---
+
+MATCH (m:Movie)
+RETURN m LIMIT 20;
+
+MATCH (m:Movie {lang: "es"})
+RETURN m;
+
+MATCH (m:Movie {title: "Jumanji"})
+RETURN m;
+
+MATCH (m:Movie {adult: "False"})
+RETURN m;
+
+MATCH (m:Movie)
+SET m.budget=toInteger(m.budget)
+
+MATCH (m:Movie)
+WHERE m.budget > 30000000
+RETURN m
+
+MATCH (m:Movie)
+RETURN count(m) AS number_of_movies
+
+MATCH (g:Genre)
+RETURN g;
+
+MATCH (g:Genre) RETURN count(g) as number_of_genres;
+
+MATCH (g:Genre {name: "Mystery"}) RETURN g;
